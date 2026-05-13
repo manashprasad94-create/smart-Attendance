@@ -1,65 +1,155 @@
-import Image from "next/image";
+'use client'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
 
 export default function Home() {
+  const router = useRouter()
+  const [session, setSession] = useState(null)
+  const [timeLeft, setTimeLeft] = useState(null)
+  const [markedCount, setMarkedCount] = useState(0)
+
+  useEffect(() => {
+    fetchSession()
+    const interval = setInterval(fetchSession, 5000)
+    return () => clearInterval(interval)
+  }, [])
+
+  useEffect(() => {
+    if (!session) return
+    const tick = setInterval(() => {
+      const remaining = new Date(session.expires_at) - Date.now()
+      if (remaining <= 0) { setSession(null); setTimeLeft(null); return }
+      setTimeLeft(remaining)
+    }, 500)
+    return () => clearInterval(tick)
+  }, [session])
+
+  async function fetchSession() {
+    const { data } = await supabase
+      .from('sessions')
+      .select('*')
+      .eq('is_active', true)
+      .gt('expires_at', new Date().toISOString())
+      .single()
+    setSession(data || null)
+    if (data) fetchCount(data.id)
+  }
+
+  async function fetchCount(sessionId) {
+    const { count } = await supabase
+      .from('attendance')
+      .select('*', { count: 'exact', head: true })
+      .eq('session_id', sessionId)
+    setMarkedCount(count || 0)
+  }
+
+  function formatTime(ms) {
+    if (!ms) return '--:--'
+    const m = Math.floor(ms / 60000)
+    const s = Math.floor((ms % 60000) / 1000)
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+  }
+
+  const isOpen = !!session && !!timeLeft
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.js file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main style={{ fontFamily: "'DM Sans', sans-serif", background: '#F7F4EF', minHeight: '100vh' }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #F7F4EF; }
+      `}</style>
+
+      {/* Nav */}
+      <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem 2.5rem' }}>
+        <span style={{ fontSize: 13, fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#5F5E5A' }}>
+          Attendance Portal
+        </span>
+        <span style={{
+          background: isOpen ? '#E6F1FB' : '#EAF3DE',
+          color: isOpen ? '#185FA5' : '#3B6D11',
+          fontSize: 11, fontWeight: 500, padding: '4px 14px', borderRadius: 20
+        }}>
+          {isOpen ? 'Session active' : 'No active session'}
+        </span>
+      </nav>
+
+      {/* Hero */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '2rem 1.5rem 0' }}>
+
+        {/* Status tag */}
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#fff', border: '0.5px solid #D3D1C7', borderRadius: 20, padding: '5px 16px', fontSize: 12, color: '#5F5E5A', marginBottom: '1.5rem' }}>
+          <span style={{ width: 7, height: 7, borderRadius: '50%', background: isOpen ? '#639922' : '#D3D1C7', display: 'inline-block' }} />
+          {isOpen ? 'Session live' : 'Session closed'}
+        </div>
+
+        {/* Heading */}
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 42, fontWeight: 700, color: '#2C2C2A', lineHeight: 1.15, marginBottom: '1rem', maxWidth: 520 }}>
+          Smart <span style={{ color: '#185FA5' }}>Attendance</span> System
+        </h1>
+        <p style={{ fontSize: 15, color: '#888780', maxWidth: 380, lineHeight: 1.7, marginBottom: '2.5rem' }}>
+          Mark your attendance quickly and securely. The session window is time-limited — submit before it closes.
+        </p>
+
+        {/* Card */}
+        <div style={{ background: '#fff', borderRadius: 20, border: '0.5px solid #D3D1C7', padding: '1.75rem 2rem', width: '100%', maxWidth: 460, marginBottom: '1.5rem' }}>
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+            <span style={{ fontSize: 12, color: '#888780', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Session Status</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 500, color: isOpen ? '#3B6D11' : '#A32D2D' }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: isOpen ? '#639922' : '#D3D1C7' }} />
+              {isOpen ? 'Live' : 'Closed'}
+            </span>
+          </div>
+
+          {/* Timer */}
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: '0.5rem' }}>
+            <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 40, fontWeight: 700, color: isOpen ? '#2C2C2A' : '#D3D1C7' }}>
+              {formatTime(timeLeft)}
+            </span>
+            <span style={{ fontSize: 12, color: '#888780' }}>remaining</span>
+          </div>
+
+          <p style={{ fontSize: 12, color: '#B4B2A9', marginBottom: '1.5rem' }}>
+            {session
+              ? `Opened at ${new Date(session.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · closes at ${new Date(session.expires_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+              : 'Waiting for host to open session...'}
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+          <button
+            onClick={() => isOpen && router.push('/mark')}
+            disabled={!isOpen}
+            style={{
+              width: '100%', padding: '14px', borderRadius: 12, border: 'none',
+              fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 500,
+              cursor: isOpen ? 'pointer' : 'not-allowed',
+              background: isOpen ? '#185FA5' : '#F1EFE8',
+              color: isOpen ? '#fff' : '#B4B2A9',
+              transition: 'all 0.18s'
+            }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            Mark Attendance
+          </button>
         </div>
-      </main>
-    </div>
-  );
+
+        {/* Stats */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, maxWidth: 460, width: '100%', marginBottom: '2rem' }}>
+          {[
+            { val: markedCount, lbl: 'Marked today' },
+            { val: 50, lbl: 'Total students' }
+          ].map(({ val, lbl }) => (
+            <div key={lbl} style={{ background: '#fff', border: '0.5px solid #D3D1C7', borderRadius: 14, padding: '1rem 1.25rem' }}>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 700, color: '#2C2C2A' }}>{val}</div>
+              <div style={{ fontSize: 12, color: '#888780', marginTop: 2 }}>{lbl}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <p style={{ textAlign: 'center', fontSize: 12, color: '#B4B2A9', paddingBottom: '2rem' }}>
+        Powered by Smart Attendance · Session auto-closes when timer ends
+      </p>
+    </main>
+  )
 }
