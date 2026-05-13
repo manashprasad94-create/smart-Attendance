@@ -44,100 +44,228 @@ export default function Home() {
   const isOpen = !!session && !!timeLeft
 
   return (
-    <main style={{ fontFamily: "'DM Sans', sans-serif", background: '#F7F4EF', minHeight: '100vh' }}>
+    <main style={{
+      fontFamily: "'DM Sans', sans-serif",
+      background: '#F7F4EF',
+      minHeight: '100vh',
+      minHeight: '100dvh',
+      display: 'flex',
+      flexDirection: 'column',
+    }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: #F7F4EF; }
+        @media (max-width: 480px) {
+          .hero-title { font-size: 32px !important; }
+          .hero-sub { font-size: 14px !important; }
+          .timer-big { font-size: 48px !important; }
+        }
       `}</style>
 
       {/* Nav */}
-      <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem 2.5rem' }}>
-        <span style={{ fontSize: 13, fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#5F5E5A' }}>
+      <nav style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '1rem 1.25rem',
+        borderBottom: '0.5px solid #E8E5DF'
+      }}>
+        <span style={{
+          fontSize: 12,
+          fontWeight: 500,
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase',
+          color: '#5F5E5A'
+        }}>
           Attendance Portal
         </span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{
-            background: isOpen ? '#E6F1FB' : '#EAF3DE',
-            color: isOpen ? '#185FA5' : '#3B6D11',
-            fontSize: 11, fontWeight: 500, padding: '4px 14px', borderRadius: 20
-          }}>
-            {isOpen ? 'Session active' : 'No active session'}
-          </span>
-          <button
-            onClick={() => router.push('/admin')}
-            style={{
-              background: '#fff', border: '0.5px solid #D3D1C7', borderRadius: 20,
-              padding: '4px 16px', fontSize: 12, fontWeight: 500, color: '#5F5E5A',
-              cursor: 'pointer', fontFamily: "'DM Sans', sans-serif"
-            }}
-          >
-            Admin
-          </button>
-        </div>
+        <button
+          onClick={() => router.push('/admin')}
+          style={{
+            background: '#fff',
+            border: '0.5px solid #D3D1C7',
+            borderRadius: 20,
+            padding: '5px 14px',
+            fontSize: 12,
+            fontWeight: 500,
+            color: '#5F5E5A',
+            cursor: 'pointer',
+            fontFamily: "'DM Sans', sans-serif",
+            minHeight: 32
+          }}
+        >
+          Admin
+        </button>
       </nav>
 
-      {/* Hero */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '2rem 1.5rem 0' }}>
+      {/* Main content — centered and grows to fill screen */}
+      <div style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '2rem 1.25rem',
+        textAlign: 'center'
+      }}>
 
-        {/* Status tag */}
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#fff', border: '0.5px solid #D3D1C7', borderRadius: 20, padding: '5px 16px', fontSize: 12, color: '#5F5E5A', marginBottom: '1.5rem' }}>
-          <span style={{ width: 7, height: 7, borderRadius: '50%', background: isOpen ? '#639922' : '#D3D1C7', display: 'inline-block' }} />
-          {isOpen ? 'Session live' : 'Session closed'}
+        {/* Status pill */}
+        <div style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 7,
+          background: '#fff',
+          border: '0.5px solid #D3D1C7',
+          borderRadius: 20,
+          padding: '6px 16px',
+          fontSize: 12,
+          color: '#5F5E5A',
+          marginBottom: '1.5rem'
+        }}>
+          <span style={{
+            width: 7, height: 7, borderRadius: '50%',
+            background: isOpen ? '#639922' : '#D3D1C7',
+            display: 'inline-block'
+          }} />
+          {isOpen ? 'Session is live' : 'No active session'}
         </div>
 
-        {/* Heading */}
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 42, fontWeight: 700, color: '#2C2C2A', lineHeight: 1.15, marginBottom: '1rem', maxWidth: 520 }}>
-          Smart <span style={{ color: '#185FA5' }}>Attendance</span> System
+        {/* Title */}
+        <h1
+          className="hero-title"
+          style={{
+            fontFamily: "'Playfair Display', serif",
+            fontSize: 38,
+            fontWeight: 700,
+            color: '#2C2C2A',
+            lineHeight: 1.2,
+            marginBottom: '0.75rem'
+          }}
+        >
+          Smart{' '}
+          <span style={{ color: '#185FA5' }}>Attendance</span>
+          {' '}System
         </h1>
-        <p style={{ fontSize: 15, color: '#888780', maxWidth: 380, lineHeight: 1.7, marginBottom: '2.5rem' }}>
-          Mark your attendance quickly and securely. The session window is time-limited — submit before it closes.
+
+        <p
+          className="hero-sub"
+          style={{
+            fontSize: 15,
+            color: '#888780',
+            lineHeight: 1.7,
+            marginBottom: '2.5rem',
+            maxWidth: 320
+          }}
+        >
+          Mark your attendance before the session closes.
         </p>
 
         {/* Card */}
-        <div style={{ background: '#fff', borderRadius: 20, border: '0.5px solid #D3D1C7', padding: '1.75rem 2rem', width: '100%', maxWidth: 460, marginBottom: '1.5rem' }}>
+        <div style={{
+          background: '#fff',
+          borderRadius: 24,
+          border: '0.5px solid #D3D1C7',
+          padding: '1.75rem 1.5rem',
+          width: '100%',
+          maxWidth: 400,
+        }}>
 
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-            <span style={{ fontSize: 12, color: '#888780', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Session Status</span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 500, color: isOpen ? '#3B6D11' : '#A32D2D' }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: isOpen ? '#639922' : '#D3D1C7' }} />
+          {/* Status row */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '1rem'
+          }}>
+            <span style={{
+              fontSize: 11,
+              color: '#888780',
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em'
+            }}>
+              Session Status
+            </span>
+            <span style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              fontSize: 13, fontWeight: 500,
+              color: isOpen ? '#3B6D11' : '#A32D2D'
+            }}>
+              <span style={{
+                width: 8, height: 8, borderRadius: '50%',
+                background: isOpen ? '#639922' : '#D3D1C7'
+              }} />
               {isOpen ? 'Live' : 'Closed'}
             </span>
           </div>
 
           {/* Timer */}
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: '0.5rem' }}>
-            <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 40, fontWeight: 700, color: isOpen ? '#2C2C2A' : '#D3D1C7' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'baseline',
+            gap: 8,
+            marginBottom: '0.5rem'
+          }}>
+            <span
+              className="timer-big"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                fontSize: 52,
+                fontWeight: 700,
+                color: isOpen ? '#2C2C2A' : '#D3D1C7',
+                lineHeight: 1
+              }}
+            >
               {formatTime(timeLeft)}
             </span>
-            <span style={{ fontSize: 12, color: '#888780' }}>remaining</span>
+            <span style={{ fontSize: 13, color: '#888780' }}>remaining</span>
           </div>
 
-          <p style={{ fontSize: 12, color: '#B4B2A9', marginBottom: '1.5rem' }}>
+          {/* Session time info */}
+          <p style={{
+            fontSize: 12,
+            color: '#B4B2A9',
+            marginBottom: '1.75rem',
+            lineHeight: 1.6
+          }}>
             {session
-              ? `Opened at ${new Date(session.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · closes at ${new Date(session.expires_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+              ? `Opens ${new Date(session.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · Closes ${new Date(session.expires_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
               : 'Waiting for host to open session...'}
           </p>
 
+          {/* CTA Button — large tap target */}
           <button
             onClick={() => isOpen && router.push('/mark')}
             disabled={!isOpen}
             style={{
-              width: '100%', padding: '14px', borderRadius: 12, border: 'none',
-              fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 500,
+              width: '100%',
+              padding: '16px',
+              borderRadius: 14,
+              border: 'none',
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: 16,
+              fontWeight: 500,
               cursor: isOpen ? 'pointer' : 'not-allowed',
               background: isOpen ? '#185FA5' : '#F1EFE8',
               color: isOpen ? '#fff' : '#B4B2A9',
-              transition: 'all 0.18s'
+              transition: 'all 0.18s',
+              minHeight: 52,
+              WebkitTapHighlightColor: 'transparent'
             }}
           >
-            Mark Attendance
+            {isOpen ? 'Mark Attendance →' : 'Session Not Open'}
           </button>
         </div>
       </div>
 
-      <p style={{ textAlign: 'center', fontSize: 12, color: '#B4B2A9', paddingBottom: '2rem' }}>
-        Powered by Smart Attendance · Session auto-closes when timer ends
+      <p style={{
+        textAlign: 'center',
+        fontSize: 11,
+        color: '#B4B2A9',
+        padding: '1rem',
+        paddingBottom: '1.5rem'
+      }}>
+        Session auto-closes when timer ends
       </p>
     </main>
   )

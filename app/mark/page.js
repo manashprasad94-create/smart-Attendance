@@ -9,7 +9,7 @@ export default function MarkAttendance() {
   const [roll, setRoll] = useState('')
   const [session, setSession] = useState(null)
   const [timeLeft, setTimeLeft] = useState(null)
-  const [status, setStatus] = useState(null) // 'success' | 'error'
+  const [status, setStatus] = useState(null)
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -62,7 +62,6 @@ export default function MarkAttendance() {
       setMessage('Please fill in both your name and roll number.')
       return
     }
-
     if (!session) {
       setStatus('error')
       setMessage('No active session found.')
@@ -73,7 +72,6 @@ export default function MarkAttendance() {
     setStatus(null)
     setMessage('')
 
-    // Step 1 — validate student exists in database
     const { data: student, error: studentError } = await supabase
       .from('students')
       .select('*')
@@ -88,7 +86,6 @@ export default function MarkAttendance() {
       return
     }
 
-    // Step 2 — check if already marked
     const { data: existing } = await supabase
       .from('attendance')
       .select('*')
@@ -103,7 +100,6 @@ export default function MarkAttendance() {
       return
     }
 
-    // Step 3 — insert attendance
     const { error: insertError } = await supabase
       .from('attendance')
       .insert({ session_id: session.id, student_id: student.id })
@@ -116,65 +112,156 @@ export default function MarkAttendance() {
     }
 
     setStatus('success')
-    setMessage(`Attendance marked successfully! Welcome, ${student.name}.`)
+    setMessage(`Attendance marked! Welcome, ${student.name}.`)
     setLoading(false)
   }
 
   const isOpen = !!session && !!timeLeft
 
   return (
-    <main style={{ fontFamily: "'DM Sans', sans-serif", background: '#F7F4EF', minHeight: '100vh' }}>
+    <main style={{
+      fontFamily: "'DM Sans', sans-serif",
+      background: '#F7F4EF',
+      minHeight: '100vh',
+      minHeight: '100dvh',
+      display: 'flex',
+      flexDirection: 'column',
+    }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: #F7F4EF; }
+        input { font-size: 16px !important; }
         input:focus { outline: none; border-color: #185FA5 !important; }
       `}</style>
 
       {/* Nav */}
-      <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem 2.5rem' }}>
+      <nav style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '1rem 1.25rem',
+        borderBottom: '0.5px solid #E8E5DF'
+      }}>
         <button
           onClick={() => router.push('/')}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 500, color: '#5F5E5A', fontFamily: "'DM Sans', sans-serif", letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: 6 }}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            fontSize: 14, fontWeight: 500, color: '#5F5E5A',
+            fontFamily: "'DM Sans', sans-serif",
+            display: 'flex', alignItems: 'center', gap: 6,
+            padding: '8px 0',
+            minHeight: 44,
+            WebkitTapHighlightColor: 'transparent'
+          }}
         >
           ← Back
         </button>
+
+        {/* Timer pill in nav */}
         {isOpen && (
-          <span style={{ background: '#FFF3E0', color: '#E65100', fontSize: 12, fontWeight: 500, padding: '4px 14px', borderRadius: 20 }}>
-            ⏱ {formatTime(timeLeft)} remaining
+          <span style={{
+            background: '#FFF3E0',
+            color: '#E65100',
+            fontSize: 12,
+            fontWeight: 500,
+            padding: '5px 14px',
+            borderRadius: 20
+          }}>
+            ⏱ {formatTime(timeLeft)}
           </span>
         )}
       </nav>
 
-      {/* Form area */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2rem 1.5rem' }}>
+      {/* Content */}
+      <div style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: '2rem 1.25rem 2rem',
+      }}>
 
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#fff', border: '0.5px solid #D3D1C7', borderRadius: 20, padding: '5px 16px', fontSize: 12, color: '#5F5E5A', marginBottom: '1.5rem' }}>
-          <span style={{ width: 7, height: 7, borderRadius: '50%', background: isOpen ? '#639922' : '#D3D1C7', display: 'inline-block' }} />
+        {/* Status pill */}
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: 7,
+          background: '#fff', border: '0.5px solid #D3D1C7',
+          borderRadius: 20, padding: '6px 16px',
+          fontSize: 12, color: '#5F5E5A', marginBottom: '1.25rem'
+        }}>
+          <span style={{
+            width: 7, height: 7, borderRadius: '50%',
+            background: isOpen ? '#639922' : '#D3D1C7',
+            display: 'inline-block'
+          }} />
           {isOpen ? 'Session is open' : 'Session closed'}
         </div>
 
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 700, color: '#2C2C2A', marginBottom: '0.5rem', textAlign: 'center' }}>
+        <h1 style={{
+          fontFamily: "'Playfair Display', serif",
+          fontSize: 30,
+          fontWeight: 700,
+          color: '#2C2C2A',
+          marginBottom: '0.4rem',
+          textAlign: 'center'
+        }}>
           Mark Your <span style={{ color: '#185FA5' }}>Attendance</span>
         </h1>
-        <p style={{ fontSize: 14, color: '#888780', marginBottom: '2.5rem', textAlign: 'center' }}>
+        <p style={{
+          fontSize: 13,
+          color: '#888780',
+          marginBottom: '2rem',
+          textAlign: 'center',
+          lineHeight: 1.6
+        }}>
           Enter your details exactly as registered
         </p>
 
-        {/* Card */}
-        <div style={{ background: '#fff', borderRadius: 20, border: '0.5px solid #D3D1C7', padding: '2rem', width: '100%', maxWidth: 440 }}>
+        {/* Form card */}
+        <div style={{
+          background: '#fff',
+          borderRadius: 24,
+          border: '0.5px solid #D3D1C7',
+          padding: '1.75rem 1.5rem',
+          width: '100%',
+          maxWidth: 400
+        }}>
 
-          {/* Success state */}
           {status === 'success' ? (
+            /* Success state */
             <div style={{ textAlign: 'center', padding: '1rem 0' }}>
-              <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#EAF3DE', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem', fontSize: 26 }}>
+              <div style={{
+                width: 64, height: 64, borderRadius: '50%',
+                background: '#EAF3DE',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 1.25rem', fontSize: 28
+              }}>
                 ✓
               </div>
-              <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: '#2C2C2A', marginBottom: '0.5rem' }}>Done!</h2>
-              <p style={{ fontSize: 14, color: '#3B6D11', lineHeight: 1.6 }}>{message}</p>
+              <h2 style={{
+                fontFamily: "'Playfair Display', serif",
+                fontSize: 24, color: '#2C2C2A', marginBottom: '0.5rem'
+              }}>
+                All Done!
+              </h2>
+              <p style={{ fontSize: 14, color: '#3B6D11', lineHeight: 1.6 }}>
+                {message}
+              </p>
               <button
                 onClick={() => router.push('/')}
-                style={{ marginTop: '1.5rem', padding: '10px 28px', borderRadius: 12, border: '0.5px solid #D3D1C7', background: '#F7F4EF', fontSize: 13, fontWeight: 500, color: '#5F5E5A', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}
+                style={{
+                  marginTop: '1.75rem',
+                  width: '100%',
+                  padding: '14px',
+                  borderRadius: 12,
+                  border: '0.5px solid #D3D1C7',
+                  background: '#F7F4EF',
+                  fontSize: 14, fontWeight: 500, color: '#5F5E5A',
+                  cursor: 'pointer',
+                  fontFamily: "'DM Sans', sans-serif",
+                  minHeight: 48,
+                  WebkitTapHighlightColor: 'transparent'
+                }}
               >
                 Back to Home
               </button>
@@ -183,14 +270,25 @@ export default function MarkAttendance() {
             <>
               {/* Error banner */}
               {status === 'error' && (
-                <div style={{ background: '#FCEBEB', border: '0.5px solid #F09595', borderRadius: 10, padding: '10px 14px', marginBottom: '1.25rem', fontSize: 13, color: '#A32D2D', lineHeight: 1.5 }}>
+                <div style={{
+                  background: '#FCEBEB',
+                  border: '0.5px solid #F09595',
+                  borderRadius: 10,
+                  padding: '12px 14px',
+                  marginBottom: '1.25rem',
+                  fontSize: 13, color: '#A32D2D', lineHeight: 1.6
+                }}>
                   {message}
                 </div>
               )}
 
               {/* Name field */}
               <div style={{ marginBottom: '1.25rem' }}>
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#5F5E5A', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+                <label style={{
+                  display: 'block', fontSize: 12, fontWeight: 500,
+                  color: '#5F5E5A', marginBottom: 8,
+                  textTransform: 'uppercase', letterSpacing: '0.07em'
+                }}>
                   Full Name
                 </label>
                 <input
@@ -199,42 +297,79 @@ export default function MarkAttendance() {
                   value={name}
                   onChange={e => setName(e.target.value)}
                   disabled={!isOpen || loading}
-                  style={{ width: '100%', padding: '12px 14px', borderRadius: 10, border: '0.5px solid #D3D1C7', fontSize: 14, color: '#2C2C2A', background: isOpen ? '#fff' : '#F7F4EF', fontFamily: "'DM Sans', sans-serif" }}
+                  autoComplete="name"
+                  style={{
+                    width: '100%',
+                    padding: '14px',
+                    borderRadius: 12,
+                    border: '0.5px solid #D3D1C7',
+                    fontSize: 16,
+                    color: '#2C2C2A',
+                    background: isOpen ? '#fff' : '#F7F4EF',
+                    fontFamily: "'DM Sans', sans-serif",
+                    minHeight: 52
+                  }}
                 />
               </div>
 
               {/* Roll field */}
-              <div style={{ marginBottom: '1.75rem' }}>
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#5F5E5A', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+              <div style={{ marginBottom: '2rem' }}>
+                <label style={{
+                  display: 'block', fontSize: 12, fontWeight: 500,
+                  color: '#5F5E5A', marginBottom: 8,
+                  textTransform: 'uppercase', letterSpacing: '0.07em'
+                }}>
                   Roll Number
                 </label>
                 <input
                   type="text"
+                  inputMode="numeric"
                   placeholder="Enter your roll number"
                   value={roll}
                   onChange={e => setRoll(e.target.value)}
                   disabled={!isOpen || loading}
-                  style={{ width: '100%', padding: '12px 14px', borderRadius: 10, border: '0.5px solid #D3D1C7', fontSize: 14, color: '#2C2C2A', background: isOpen ? '#fff' : '#F7F4EF', fontFamily: "'DM Sans', sans-serif" }}
+                  style={{
+                    width: '100%',
+                    padding: '14px',
+                    borderRadius: 12,
+                    border: '0.5px solid #D3D1C7',
+                    fontSize: 16,
+                    color: '#2C2C2A',
+                    background: isOpen ? '#fff' : '#F7F4EF',
+                    fontFamily: "'DM Sans', sans-serif",
+                    minHeight: 52
+                  }}
                 />
               </div>
 
+              {/* Submit button */}
               <button
                 onClick={handleSubmit}
                 disabled={!isOpen || loading}
                 style={{
-                  width: '100%', padding: '14px', borderRadius: 12, border: 'none',
-                  fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 500,
+                  width: '100%',
+                  padding: '16px',
+                  borderRadius: 14,
+                  border: 'none',
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontSize: 16,
+                  fontWeight: 500,
                   cursor: isOpen && !loading ? 'pointer' : 'not-allowed',
                   background: isOpen && !loading ? '#185FA5' : '#F1EFE8',
                   color: isOpen && !loading ? '#fff' : '#B4B2A9',
-                  transition: 'all 0.18s'
+                  transition: 'all 0.18s',
+                  minHeight: 52,
+                  WebkitTapHighlightColor: 'transparent'
                 }}
               >
                 {loading ? 'Submitting...' : 'Submit Attendance'}
               </button>
 
-              <p style={{ fontSize: 11, color: '#B4B2A9', textAlign: 'center', marginTop: '1rem', lineHeight: 1.6 }}>
-                Your name and roll number must match exactly as registered by your host
+              <p style={{
+                fontSize: 11, color: '#B4B2A9',
+                textAlign: 'center', marginTop: '1rem', lineHeight: 1.6
+              }}>
+                Name and roll must match exactly as registered
               </p>
             </>
           )}
