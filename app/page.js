@@ -7,7 +7,6 @@ export default function Home() {
   const router = useRouter()
   const [session, setSession] = useState(null)
   const [timeLeft, setTimeLeft] = useState(null)
-  const [markedCount, setMarkedCount] = useState(0)
 
   useEffect(() => {
     fetchSession()
@@ -33,15 +32,6 @@ export default function Home() {
       .gt('expires_at', new Date().toISOString())
       .single()
     setSession(data || null)
-    if (data) fetchCount(data.id)
-  }
-
-  async function fetchCount(sessionId) {
-    const { count } = await supabase
-      .from('attendance')
-      .select('*', { count: 'exact', head: true })
-      .eq('session_id', sessionId)
-    setMarkedCount(count || 0)
   }
 
   function formatTime(ms) {
@@ -66,13 +56,25 @@ export default function Home() {
         <span style={{ fontSize: 13, fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#5F5E5A' }}>
           Attendance Portal
         </span>
-        <span style={{
-          background: isOpen ? '#E6F1FB' : '#EAF3DE',
-          color: isOpen ? '#185FA5' : '#3B6D11',
-          fontSize: 11, fontWeight: 500, padding: '4px 14px', borderRadius: 20
-        }}>
-          {isOpen ? 'Session active' : 'No active session'}
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{
+            background: isOpen ? '#E6F1FB' : '#EAF3DE',
+            color: isOpen ? '#185FA5' : '#3B6D11',
+            fontSize: 11, fontWeight: 500, padding: '4px 14px', borderRadius: 20
+          }}>
+            {isOpen ? 'Session active' : 'No active session'}
+          </span>
+          <button
+            onClick={() => router.push('/admin')}
+            style={{
+              background: '#fff', border: '0.5px solid #D3D1C7', borderRadius: 20,
+              padding: '4px 16px', fontSize: 12, fontWeight: 500, color: '#5F5E5A',
+              cursor: 'pointer', fontFamily: "'DM Sans', sans-serif"
+            }}
+          >
+            Admin
+          </button>
+        </div>
       </nav>
 
       {/* Hero */}
@@ -131,19 +133,6 @@ export default function Home() {
           >
             Mark Attendance
           </button>
-        </div>
-
-        {/* Stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, maxWidth: 460, width: '100%', marginBottom: '2rem' }}>
-          {[
-            { val: markedCount, lbl: 'Marked today' },
-            { val: 50, lbl: 'Total students' }
-          ].map(({ val, lbl }) => (
-            <div key={lbl} style={{ background: '#fff', border: '0.5px solid #D3D1C7', borderRadius: 14, padding: '1rem 1.25rem' }}>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 700, color: '#2C2C2A' }}>{val}</div>
-              <div style={{ fontSize: 12, color: '#888780', marginTop: 2 }}>{lbl}</div>
-            </div>
-          ))}
         </div>
       </div>
 
