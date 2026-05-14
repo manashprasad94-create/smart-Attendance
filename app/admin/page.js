@@ -17,6 +17,7 @@ export default function Admin() {
   const [loading, setLoading] = useState(false)
   const [copied, setCopied] = useState(false)
   const [sessionStarted, setSessionStarted] = useState(false)
+  const [subject, setSubject] = useState('')
 
   async function handleLogin() {
     const res = await fetch('/api/auth', {
@@ -129,44 +130,73 @@ export default function Admin() {
     return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
   }
 
-  // sorted present students by roll number ascending
   const presentStudents = [...attendance]
     .filter(a => a.students)
     .sort((a, b) => {
-        const rollA = a.students.roll_number.toString().padStart(10, '0')
-        const rollB = b.students.roll_number.toString().padStart(10, '0')
-        return rollA.localeCompare(rollB)
+      const rollA = a.students.roll_number.toString().padStart(10, '0')
+      const rollB = b.students.roll_number.toString().padStart(10, '0')
+      return rollA.localeCompare(rollB)
     })
 
-  function copyAttendance() {
-    const lines = presentStudents.map((a, i) =>
-      `${i + 1}. ${a.students.roll_number}  ${a.students.name}`
+    function copyAttendance() {
+    const lines = presentStudents.map(a =>
+        `${a.students.roll_number}  ${a.students.name}`
     )
     const text =
-      `Attendance Report — ${new Date().toLocaleDateString()}\n` +
-      `Total Present: ${presentStudents.length} / ${allStudents.length}\n\n` +
-      lines.join('\n')
+        `Subject: ${subject || 'N/A'}\n` +
+        `Date: ${new Date().toLocaleDateString()}\n` +
+        `Total Present: ${presentStudents.length} / ${allStudents.length}\n\n` +
+        lines.join('\n')
     navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 2500)
-  }
+    }
 
   const isOpen = !!session && !!timeLeft
 
   // ── Password screen ──────────────────────────────────
   if (!authed) {
     return (
-      <main style={{ fontFamily: "'DM Sans', sans-serif", background: '#F7F4EF', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <main style={{
+        fontFamily: "'DM Sans', sans-serif",
+        background: '#F7F4EF',
+        minHeight: '100vh',
+        minHeight: '100dvh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '1.5rem'
+      }}>
         <style>{`
           @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500&display=swap');
           * { box-sizing: border-box; margin: 0; padding: 0; }
+          input { font-size: 16px !important; }
           input:focus { outline: none; border-color: #185FA5 !important; }
         `}</style>
-        <div style={{ background: '#fff', borderRadius: 20, border: '0.5px solid #D3D1C7', padding: '2.5rem 2rem', width: '100%', maxWidth: 380, textAlign: 'center' }}>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, color: '#2C2C2A', marginBottom: '0.5rem' }}>Admin Access</h1>
-          <p style={{ fontSize: 13, color: '#888780', marginBottom: '2rem' }}>Enter your admin password to continue</p>
+        <div style={{
+          background: '#fff',
+          borderRadius: 24,
+          border: '0.5px solid #D3D1C7',
+          padding: '2.5rem 1.75rem',
+          width: '100%',
+          maxWidth: 380,
+          textAlign: 'center'
+        }}>
+          <h1 style={{
+            fontFamily: "'Playfair Display', serif",
+            fontSize: 28, color: '#2C2C2A', marginBottom: '0.5rem'
+          }}>
+            Admin Access
+          </h1>
+          <p style={{ fontSize: 13, color: '#888780', marginBottom: '2rem' }}>
+            Enter your admin password to continue
+          </p>
           {authError && (
-            <div style={{ background: '#FCEBEB', border: '0.5px solid #F09595', borderRadius: 10, padding: '10px 14px', marginBottom: '1rem', fontSize: 13, color: '#A32D2D' }}>
+            <div style={{
+              background: '#FCEBEB', border: '0.5px solid #F09595',
+              borderRadius: 10, padding: '12px 14px',
+              marginBottom: '1rem', fontSize: 13, color: '#A32D2D'
+            }}>
               {authError}
             </div>
           )}
@@ -176,11 +206,26 @@ export default function Admin() {
             value={passwordInput}
             onChange={e => setPasswordInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleLogin()}
-            style={{ width: '100%', padding: '12px 14px', borderRadius: 10, border: '0.5px solid #D3D1C7', fontSize: 14, color: '#2C2C2A', fontFamily: "'DM Sans', sans-serif", marginBottom: '1rem' }}
+            style={{
+              width: '100%', padding: '14px',
+              borderRadius: 12, border: '0.5px solid #D3D1C7',
+              fontSize: 16, color: '#2C2C2A',
+              fontFamily: "'DM Sans', sans-serif",
+              marginBottom: '1rem', minHeight: 52
+            }}
           />
           <button
             onClick={handleLogin}
-            style={{ width: '100%', padding: '13px', borderRadius: 12, border: 'none', background: '#185FA5', color: '#fff', fontSize: 15, fontWeight: 500, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}
+            style={{
+              width: '100%', padding: '15px',
+              borderRadius: 12, border: 'none',
+              background: '#185FA5', color: '#fff',
+              fontSize: 16, fontWeight: 500,
+              cursor: 'pointer',
+              fontFamily: "'DM Sans', sans-serif",
+              minHeight: 52,
+              WebkitTapHighlightColor: 'transparent'
+            }}
           >
             Enter
           </button>
@@ -191,7 +236,12 @@ export default function Admin() {
 
   // ── Admin panel ──────────────────────────────────────
   return (
-    <main style={{ fontFamily: "'DM Sans', sans-serif", background: '#F7F4EF', minHeight: '100vh' }}>
+    <main style={{
+      fontFamily: "'DM Sans', sans-serif",
+      background: '#F7F4EF',
+      minHeight: '100vh',
+      minHeight: '100dvh'
+    }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -201,81 +251,164 @@ export default function Admin() {
       {/* Session started popup */}
       {sessionStarted && (
         <div style={{
-          position: 'fixed', top: 24, left: '50%', transform: 'translateX(-50%)',
-          zIndex: 999, background: '#fff', border: '0.5px solid #D3D1C7',
-          borderRadius: 16, padding: '1rem 1.75rem',
+          position: 'fixed', top: 16, left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 999, background: '#fff',
+          border: '0.5px solid #D3D1C7',
+          borderRadius: 16, padding: '1rem 1.5rem',
           boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
-          display: 'flex', alignItems: 'center', gap: 12, minWidth: 320
+          display: 'flex', alignItems: 'center',
+          gap: 12, width: 'calc(100% - 2rem)',
+          maxWidth: 360
         }}>
-          <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#EAF3DE', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>
+          <div style={{
+            width: 36, height: 36, borderRadius: '50%',
+            background: '#EAF3DE',
+            display: 'flex', alignItems: 'center',
+            justifyContent: 'center', fontSize: 16, flexShrink: 0
+          }}>
             ✓
           </div>
           <div>
-            <p style={{ fontSize: 14, fontWeight: 500, color: '#2C2C2A', marginBottom: 2 }}>Session Started!</p>
+            <p style={{ fontSize: 14, fontWeight: 500, color: '#2C2C2A', marginBottom: 2 }}>
+              Session Started!
+            </p>
             <p style={{ fontSize: 12, color: '#3B6D11' }}>
-              {duration} min session · will end at{' '}
-              {session ? new Date(session.expires_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+              {duration} min · ends at{' '}
+              {session
+                ? new Date(session.expires_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                : ''}
             </p>
           </div>
         </div>
       )}
 
       {/* Nav */}
-      <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem 2.5rem' }}>
+      <nav style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0.75rem 1.25rem',
+        borderBottom: '0.5px solid #E8E5DF',
+        minHeight: 56
+      }}>
         <button
           onClick={() => router.push('/')}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 500, color: '#5F5E5A', fontFamily: "'DM Sans', sans-serif", display: 'flex', alignItems: 'center', gap: 6 }}
+          style={{
+            background: '#fff',
+            border: '0.5px solid #D3D1C7',
+            borderRadius: 20,
+            padding: '8px 18px',
+            fontSize: 13,
+            fontWeight: 500,
+            color: '#5F5E5A',
+            cursor: 'pointer',
+            fontFamily: "'DM Sans', sans-serif",
+            minHeight: 44,
+            minWidth: 80,
+            WebkitTapHighlightColor: 'transparent',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6
+          }}
         >
           ← Back
         </button>
-        <span style={{ fontSize: 13, fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#5F5E5A' }}>Admin Panel</span>
+
+        <span style={{
+          fontSize: 12, fontWeight: 500,
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase', color: '#5F5E5A'
+        }}>
+          Admin Panel
+        </span>
+
         <span style={{
           background: isOpen ? '#E6F1FB' : '#EAF3DE',
           color: isOpen ? '#185FA5' : '#3B6D11',
-          fontSize: 11, fontWeight: 500, padding: '4px 14px', borderRadius: 20
+          fontSize: 11, fontWeight: 500,
+          padding: '5px 12px', borderRadius: 20
         }}>
-          {isOpen ? 'Session active' : 'No active session'}
+          {isOpen ? 'Live' : 'Closed'}
         </span>
       </nav>
 
-      <div style={{ maxWidth: 680, margin: '0 auto', padding: '1rem 1.5rem 4rem' }}>
+      <div style={{ padding: '1.5rem 1.25rem 4rem', maxWidth: 600, margin: '0 auto' }}>
 
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, color: '#2C2C2A', marginBottom: '0.4rem' }}>
+        <h1 style={{
+          fontFamily: "'Playfair Display', serif",
+          fontSize: 28, color: '#2C2C2A', marginBottom: '0.3rem'
+        }}>
           Manage <span style={{ color: '#185FA5' }}>Session</span>
         </h1>
-        <p style={{ fontSize: 14, color: '#888780', marginBottom: '2rem' }}>
-          Start a session, monitor attendance, and export the report.
+        <p style={{ fontSize: 13, color: '#888780', marginBottom: '1.5rem' }}>
+          Start a session, monitor attendance, and copy the report.
         </p>
 
         {/* Session control card */}
-        <div style={{ background: '#fff', borderRadius: 20, border: '0.5px solid #D3D1C7', padding: '1.75rem 2rem', marginBottom: '1.5rem' }}>
+        <div style={{
+          background: '#fff', borderRadius: 20,
+          border: '0.5px solid #D3D1C7',
+          padding: '1.5rem', marginBottom: '1.25rem'
+        }}>
           {isOpen ? (
             <>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+              <div style={{
+                display: 'flex', alignItems: 'center',
+                justifyContent: 'space-between', marginBottom: '1rem'
+              }}>
                 <div>
-                  <p style={{ fontSize: 12, color: '#888780', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>Time Remaining</p>
-                  <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 38, fontWeight: 700, color: '#2C2C2A' }}>
+                  <p style={{
+                    fontSize: 11, color: '#888780',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.08em', marginBottom: 4
+                  }}>
+                    Time Remaining
+                  </p>
+                  <span style={{
+                    fontFamily: "'Playfair Display', serif",
+                    fontSize: 42, fontWeight: 700, color: '#2C2C2A'
+                  }}>
                     {formatTime(timeLeft)}
                   </span>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <p style={{ fontSize: 12, color: '#888780', marginBottom: 4 }}>Closes at</p>
-                  <p style={{ fontSize: 16, fontWeight: 500, color: '#2C2C2A' }}>
+                  <p style={{ fontSize: 11, color: '#888780', marginBottom: 4 }}>Closes at</p>
+                  <p style={{ fontSize: 18, fontWeight: 500, color: '#2C2C2A' }}>
                     {new Date(session.expires_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: '#F7F4EF', borderRadius: 10, marginBottom: '1.25rem' }}>
+
+              <div style={{
+                display: 'flex', alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '10px 14px', background: '#F7F4EF',
+                borderRadius: 10, marginBottom: '1.25rem'
+              }}>
                 <span style={{ fontSize: 13, color: '#5F5E5A' }}>
-                  {presentStudents.length} of {allStudents.length} students present
+                  {presentStudents.length} of {allStudents.length} present
                 </span>
                 <span style={{ fontSize: 13, fontWeight: 500, color: '#185FA5' }}>
-                  {allStudents.length > 0 ? Math.round((presentStudents.length / allStudents.length) * 100) : 0}%
+                  {allStudents.length > 0
+                    ? Math.round((presentStudents.length / allStudents.length) * 100)
+                    : 0}%
                 </span>
               </div>
+
               <button
                 onClick={closeSession}
-                style={{ width: '100%', padding: '13px', borderRadius: 12, border: '0.5px solid #F09595', background: '#FCEBEB', color: '#A32D2D', fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}
+                style={{
+                  width: '100%', padding: '14px',
+                  borderRadius: 12,
+                  border: '0.5px solid #F09595',
+                  background: '#FCEBEB', color: '#A32D2D',
+                  fontSize: 15, fontWeight: 500,
+                  cursor: 'pointer',
+                  fontFamily: "'DM Sans', sans-serif",
+                  minHeight: 52,
+                  WebkitTapHighlightColor: 'transparent'
+                }}
               >
                 Close Session Early
               </button>
@@ -286,20 +419,27 @@ export default function Admin() {
                 Start a new attendance session
               </p>
               <div style={{ marginBottom: '1.25rem' }}>
-                <label style={{ display: 'block', fontSize: 12, color: '#888780', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>
+                <label style={{
+                  display: 'block', fontSize: 12, color: '#888780',
+                  textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 10
+                }}>
                   Session Duration
                 </label>
-                <div style={{ display: 'flex', gap: 10 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8 }}>
                   {[3, 5, 10, 15].map(d => (
                     <button
                       key={d}
                       onClick={() => setDuration(d)}
                       style={{
-                        flex: 1, padding: '10px 0', borderRadius: 10, fontSize: 14,
-                        fontWeight: 500, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
+                        padding: '12px 0', borderRadius: 10,
+                        fontSize: 14, fontWeight: 500,
+                        cursor: 'pointer',
+                        fontFamily: "'DM Sans', sans-serif",
+                        minHeight: 48,
                         border: duration === d ? '2px solid #185FA5' : '0.5px solid #D3D1C7',
                         background: duration === d ? '#E6F1FB' : '#fff',
-                        color: duration === d ? '#185FA5' : '#5F5E5A'
+                        color: duration === d ? '#185FA5' : '#5F5E5A',
+                        WebkitTapHighlightColor: 'transparent'
                       }}
                     >
                       {d} min
@@ -310,7 +450,17 @@ export default function Admin() {
               <button
                 onClick={startSession}
                 disabled={loading}
-                style={{ width: '100%', padding: '13px', borderRadius: 12, border: 'none', background: loading ? '#F1EFE8' : '#185FA5', color: loading ? '#B4B2A9' : '#fff', fontSize: 15, fontWeight: 500, cursor: loading ? 'not-allowed' : 'pointer', fontFamily: "'DM Sans', sans-serif" }}
+                style={{
+                  width: '100%', padding: '15px',
+                  borderRadius: 12, border: 'none',
+                  background: loading ? '#F1EFE8' : '#185FA5',
+                  color: loading ? '#B4B2A9' : '#fff',
+                  fontSize: 16, fontWeight: 500,
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  fontFamily: "'DM Sans', sans-serif",
+                  minHeight: 52,
+                  WebkitTapHighlightColor: 'transparent'
+                }}
               >
                 {loading ? 'Starting...' : `Start ${duration}-Minute Session`}
               </button>
@@ -320,50 +470,92 @@ export default function Admin() {
 
         {/* Present students list */}
         {presentStudents.length > 0 && (
-          <div style={{ background: '#fff', borderRadius: 20, border: '0.5px solid #D3D1C7', padding: '1.75rem 2rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+          <div style={{
+            background: '#fff', borderRadius: 20,
+            border: '0.5px solid #D3D1C7', padding: '1.5rem'
+          }}>
+            <div style={{
+              display: 'flex', alignItems: 'center',
+              justifyContent: 'space-between', marginBottom: '1.25rem'
+            }}>
               <div>
-                <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, color: '#2C2C2A', marginBottom: 2 }}>
+                <h2 style={{
+                  fontFamily: "'Playfair Display', serif",
+                  fontSize: 18, color: '#2C2C2A', marginBottom: 2
+                }}>
                   Present Students
                 </h2>
                 <p style={{ fontSize: 12, color: '#888780' }}>
-                  {presentStudents.length} of {allStudents.length} marked · sorted by roll number
+                  {presentStudents.length} of {allStudents.length} · by roll number
                 </p>
               </div>
               <button
                 onClick={copyAttendance}
-                style={{ padding: '7px 18px', borderRadius: 10, border: '0.5px solid #D3D1C7', background: copied ? '#EAF3DE' : '#fff', color: copied ? '#3B6D11' : '#5F5E5A', fontSize: 12, fontWeight: 500, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}
+                style={{
+                  padding: '8px 18px', borderRadius: 10,
+                  border: '0.5px solid #D3D1C7',
+                  background: copied ? '#EAF3DE' : '#fff',
+                  color: copied ? '#3B6D11' : '#5F5E5A',
+                  fontSize: 13, fontWeight: 500,
+                  cursor: 'pointer',
+                  fontFamily: "'DM Sans', sans-serif",
+                  minHeight: 44,
+                  WebkitTapHighlightColor: 'transparent'
+                }}
               >
                 {copied ? '✓ Copied' : 'Copy List'}
               </button>
             </div>
 
             {/* Header */}
-            <div style={{ display: 'grid', gridTemplateColumns: '50px 80px 1fr', gap: 12, padding: '8px 12px', background: '#F7F4EF', borderRadius: 8, marginBottom: 6 }}>
-              <span style={{ fontSize: 11, color: '#888780', textTransform: 'uppercase', letterSpacing: '0.07em' }}>#</span>
+            <div style={{
+              display: 'grid', gridTemplateColumns: '80px 1fr',
+              gap: 12, padding: '8px 12px',
+              background: '#F7F4EF', borderRadius: 8, marginBottom: 6
+            }}>
               <span style={{ fontSize: 11, color: '#888780', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Roll</span>
               <span style={{ fontSize: 11, color: '#888780', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Name</span>
             </div>
 
             {/* Rows */}
-            {presentStudents.map((a, i) => (
-              <div key={a.id} style={{ display: 'grid', gridTemplateColumns: '50px 80px 1fr', gap: 12, padding: '10px 12px', borderBottom: '0.5px solid #F1EFE8', alignItems: 'center' }}>
-                <span style={{ fontSize: 13, color: '#B4B2A9' }}>{i + 1}</span>
-                <span style={{ fontSize: 13, color: '#888780' }}>{a.students.roll_number}</span>
-                <span style={{ fontSize: 14, color: '#2C2C2A', fontWeight: 500 }}>{a.students.name}</span>
+            {presentStudents.map(a => (
+              <div
+                key={a.id}
+                style={{
+                  display: 'grid', gridTemplateColumns: '80px 1fr',
+                  gap: 12, padding: '12px',
+                  borderBottom: '0.5px solid #F1EFE8',
+                  alignItems: 'center'
+                }}
+              >
+                <span style={{ fontSize: 13, color: '#888780' }}>
+                  {a.students.roll_number}
+                </span>
+                <span style={{ fontSize: 15, color: '#2C2C2A', fontWeight: 500 }}>
+                  {a.students.name}
+                </span>
               </div>
             ))}
 
-            <p style={{ fontSize: 11, color: '#B4B2A9', marginTop: '1rem', textAlign: 'center' }}>
-              Updates live every 4 seconds · Copy List to share with teacher
+            <p style={{
+              fontSize: 11, color: '#B4B2A9',
+              marginTop: '1rem', textAlign: 'center'
+            }}>
+              Updates live · Copy List to share with teacher
             </p>
           </div>
         )}
 
-        {/* Empty state — session open but no one marked yet */}
+        {/* Empty state */}
         {isOpen && presentStudents.length === 0 && (
-          <div style={{ background: '#fff', borderRadius: 20, border: '0.5px solid #D3D1C7', padding: '2.5rem 2rem', textAlign: 'center' }}>
-            <p style={{ fontSize: 14, color: '#B4B2A9' }}>Waiting for students to mark attendance...</p>
+          <div style={{
+            background: '#fff', borderRadius: 20,
+            border: '0.5px solid #D3D1C7',
+            padding: '2.5rem 1.5rem', textAlign: 'center'
+          }}>
+            <p style={{ fontSize: 14, color: '#B4B2A9' }}>
+              Waiting for students to mark attendance...
+            </p>
           </div>
         )}
       </div>
