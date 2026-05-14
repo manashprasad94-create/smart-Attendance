@@ -133,11 +133,9 @@ export default function Admin() {
   const presentStudents = [...attendance]
     .filter(a => a.students)
     .sort((a, b) => {
-      const rollA = parseInt(a.students.roll_number) || a.students.roll_number
-      const rollB = parseInt(b.students.roll_number) || b.students.roll_number
-      if (rollA < rollB) return -1
-      if (rollA > rollB) return 1
-      return 0
+        const rollA = a.students.roll_number.toString().padStart(10, '0')
+        const rollB = b.students.roll_number.toString().padStart(10, '0')
+        return rollA.localeCompare(rollB)
     })
 
   function copyAttendance() {
