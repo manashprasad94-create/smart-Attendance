@@ -267,6 +267,19 @@ export default function Home() {
       }}>
         Session auto-closes when timer ends
       </p>
+      <div
+  style={{
+    textAlign: 'center',
+    padding: '1.5rem 1rem',
+    fontSize: 15,
+    color: '#A8A59D',
+    fontFamily: "'DM Sans', sans-serif",
+    lineHeight: 1.6
+  }}
+>
+  Made without ❤️ by Manash for IT1_2024-2028
+</div>
     </main>
+    
   )
 }
