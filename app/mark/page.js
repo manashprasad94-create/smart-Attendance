@@ -56,65 +56,93 @@ export default function MarkAttendance() {
     return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
   }
 
-  async function handleSubmit() {
-    if (!name.trim() || !roll.trim()) {
-      setStatus('error')
-      setMessage('Please fill in both your name and roll number.')
-      return
-    }
-    if (!session) {
-      setStatus('error')
-      setMessage('No active session found.')
-      return
-    }
-
-    setLoading(true)
-    setStatus(null)
-    setMessage('')
-
-    const { data: student, error: studentError } = await supabase
-      .from('students')
-      .select('*')
-      .ilike('name', name.trim())
-      .eq('roll_number', roll.trim())
-      .single()
-
-    if (studentError || !student) {
-      setStatus('error')
-      setMessage('Name and roll number do not match our records. Please check and try again.')
-      setLoading(false)
-      return
-    }
-
-    const { data: existing } = await supabase
-      .from('attendance')
-      .select('*')
-      .eq('session_id', session.id)
-      .eq('student_id', student.id)
-      .single()
-
-    if (existing) {
-      setStatus('error')
-      setMessage('You have already marked your attendance for this session.')
-      setLoading(false)
-      return
-    }
-
-    const { error: insertError } = await supabase
-      .from('attendance')
-      .insert({ session_id: session.id, student_id: student.id })
-
-    if (insertError) {
-      setStatus('error')
-      setMessage('Something went wrong. Please try again.')
-      setLoading(false)
-      return
-    }
-
-    setStatus('success')
-    setMessage(`Attendance marked! Welcome, ${student.name}.`)
-    setLoading(false)
+async function handleSubmit() {
+  if (!name.trim() || !roll.trim()) {
+    setStatus('error')
+    setMessage('Please fill in both your name and roll number.')
+    return
   }
+
+  if (!session) {
+    setStatus('error')
+    setMessage('No active session found.')
+    return
+  }
+
+  setLoading(true)
+  setStatus(null)
+  setMessage('')
+
+  // Get student location if geofencing is enabled
+  let studentLat = null
+  let studentLng = null
+
+  const geofencingEnabled = process.env.NEXT_PUBLIC_GEOFENCING_ENABLED === 'true'
+
+  if (geofencingEnabled) {
+    setMessage('Getting your location...')
+    const locationResult = await new Promise((resolve) => {
+      if (!navigator.geolocation) {
+        resolve({ error: 'Your browser does not support location access.' })
+        return
+      }
+      navigator.geolocation.getCurrentPosition(
+        (pos) => resolve({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude
+        }),
+        (err) => {
+          if (err.code === 1) {
+            resolve({ error: 'Location permission denied. Please allow location and try again.' })
+          } else {
+            resolve({ error: 'Could not get your location. Please try again.' })
+          }
+        },
+        { timeout: 10000, maximumAge: 0, enableHighAccuracy: true }
+      )
+    })
+
+    if (locationResult.error) {
+      setStatus('error')
+      setMessage(locationResult.error)
+      setLoading(false)
+      return
+    }
+
+    studentLat = locationResult.lat
+    studentLng = locationResult.lng
+    setMessage('')
+  }
+
+  try {
+    const res = await fetch('/api/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: name.trim(),
+        roll: roll.trim(),
+        sessionId: session.id,
+        studentLat,
+        studentLng
+      })
+    })
+
+    const data = await res.json()
+
+    if (!res.ok) {
+      setStatus('error')
+      setMessage(data.error || 'Something went wrong.')
+    } else {
+      setStatus('success')
+      setMessage(`Attendance marked! Welcome, ${data.name}.`)
+    }
+  } catch {
+    setStatus('error')
+    setMessage('Network error. Please try again.')
+  }
+
+  setLoading(false)
+}
 
   const isOpen = !!session && !!timeLeft
 

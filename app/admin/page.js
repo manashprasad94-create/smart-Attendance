@@ -18,6 +18,7 @@ export default function Admin() {
   const [copied, setCopied] = useState(false)
   const [sessionStarted, setSessionStarted] = useState(false)
   const [subject, setSubject] = useState('')
+  const [radius, setRadius] = useState(100)
 
   async function handleLogin() {
     const res = await fetch('/api/auth', {
@@ -90,28 +91,53 @@ export default function Admin() {
     setAttendance(data || [])
   }
 
-  async function startSession() {
-    setLoading(true)
-    await supabase
-      .from('sessions')
-      .update({ is_active: false })
-      .eq('is_active', true)
+async function startSession() {
+  setLoading(true)
 
-    const expires = new Date(Date.now() + duration * 60 * 1000).toISOString()
-    const { data, error } = await supabase
-      .from('sessions')
-      .insert({ expires_at: expires, duration_minutes: duration, is_active: true })
-      .select()
-      .single()
+  // Get host's location first
+  let hostLat = null
+  let hostLng = null
 
-    if (!error) {
-      setSession(data)
-      setAttendance([])
-      setSessionStarted(true)
-      setTimeout(() => setSessionStarted(false), 4000)
-    }
-    setLoading(false)
+  await new Promise((resolve) => {
+    if (!navigator.geolocation) { resolve(); return }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        hostLat = pos.coords.latitude
+        hostLng = pos.coords.longitude
+        resolve()
+      },
+      () => resolve(), // if location fails, session still starts without geofencing
+      { timeout: 8000, enableHighAccuracy: true }
+    )
+  })
+
+  await supabase
+    .from('sessions')
+    .update({ is_active: false })
+    .eq('is_active', true)
+
+  const expires = new Date(Date.now() + duration * 60 * 1000).toISOString()
+  const { data, error } = await supabase
+    .from('sessions')
+    .insert({
+      expires_at: expires,
+      duration_minutes: duration,
+      is_active: true,
+      host_lat: hostLat,
+      host_lng: hostLng,
+      geo_radius: radius
+    })
+    .select()
+    .single()
+
+  if (!error) {
+    setSession(data)
+    setAttendance([])
+    setSessionStarted(true)
+    setTimeout(() => setSessionStarted(false), 4000)
   }
+  setLoading(false)
+}
 
   async function closeSession() {
     if (!session) return
@@ -443,6 +469,37 @@ export default function Admin() {
                       }}
                     >
                       {d} min
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Radius picker */}
+              <div style={{ marginBottom: '1.25rem' }}>
+                <label style={{
+                  display: 'block', fontSize: 12, color: '#888780',
+                  textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 10
+                }}>
+                  Allowed Radius
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8 }}>
+                  {[50, 100, 200, 500].map(r => (
+                    <button
+                      key={r}
+                      onClick={() => setRadius(r)}
+                      style={{
+                        padding: '12px 0', borderRadius: 10,
+                        fontSize: 13, fontWeight: 500,
+                        cursor: 'pointer',
+                        fontFamily: "'DM Sans', sans-serif",
+                        minHeight: 48,
+                        border: radius === r ? '2px solid #185FA5' : '0.5px solid #D3D1C7',
+                        background: radius === r ? '#E6F1FB' : '#fff',
+                        color: radius === r ? '#185FA5' : '#5F5E5A',
+                        WebkitTapHighlightColor: 'transparent'
+                      }}
+                    >
+                      {r} m
                     </button>
                   ))}
                 </div>
