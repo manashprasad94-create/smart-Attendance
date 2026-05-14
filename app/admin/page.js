@@ -19,6 +19,7 @@ export default function Admin() {
   const [sessionStarted, setSessionStarted] = useState(false)
   const [subject, setSubject] = useState('')
   const [radius, setRadius] = useState(100)
+  const [geoEnabled, setGeoEnabled] = useState(true)
 
   async function handleLogin() {
     const res = await fetch('/api/auth', {
@@ -125,7 +126,8 @@ async function startSession() {
       is_active: true,
       host_lat: hostLat,
       host_lng: hostLng,
-      geo_radius: radius
+      geo_radius: radius,
+      geo_enabled: geoEnabled
     })
     .select()
     .single()
@@ -472,6 +474,46 @@ async function startSession() {
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Geofencing toggle */}
+              <div style={{
+                display: 'flex', alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '12px 16px',
+                background: geoEnabled ? '#E6F1FB' : '#F7F4EF',
+                borderRadius: 12, marginBottom: '1.25rem',
+                border: geoEnabled ? '0.5px solid #B5D4F4' : '0.5px solid #D3D1C7'
+              }}>
+                <div>
+                  <p style={{ fontSize: 14, fontWeight: 500, color: '#2C2C2A', marginBottom: 2 }}>
+                    Geofencing
+                  </p>
+                  <p style={{ fontSize: 12, color: '#888780' }}>
+                    {geoEnabled ? 'Students must be in the classroom' : 'Location not required'}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setGeoEnabled(!geoEnabled)}
+                  style={{
+                    width: 52, height: 28, borderRadius: 20,
+                    border: 'none', cursor: 'pointer',
+                    background: geoEnabled ? '#185FA5' : '#D3D1C7',
+                    position: 'relative', transition: 'background 0.2s',
+                    WebkitTapHighlightColor: 'transparent',
+                    flexShrink: 0
+                  }}
+                >
+                  <span style={{
+                    position: 'absolute',
+                    top: 3,
+                    left: geoEnabled ? 26 : 3,
+                    width: 22, height: 22,
+                    borderRadius: '50%',
+                    background: '#fff',
+                    transition: 'left 0.2s'
+                  }} />
+                </button>
               </div>
 
               {/* Radius picker */}

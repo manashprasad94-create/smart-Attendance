@@ -73,13 +73,11 @@ async function handleSubmit() {
   setStatus(null)
   setMessage('')
 
-  // Get student location if geofencing is enabled
   let studentLat = null
   let studentLng = null
 
-  const geofencingEnabled = process.env.NEXT_PUBLIC_GEOFENCING_ENABLED === 'true'
-
-  if (geofencingEnabled) {
+  // Only get location if geofencing is on for this session
+  if (session.geo_enabled) {
     setMessage('Getting your location...')
     const locationResult = await new Promise((resolve) => {
       if (!navigator.geolocation) {
@@ -143,7 +141,6 @@ async function handleSubmit() {
 
   setLoading(false)
 }
-
   const isOpen = !!session && !!timeLeft
 
   return (

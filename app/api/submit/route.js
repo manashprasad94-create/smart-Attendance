@@ -11,7 +11,6 @@ export async function POST(request) {
   try {
     const { name, roll, sessionId, studentLat, studentLng } = await request.json()
 
-    // Get IP
     const forwarded = request.headers.get('x-forwarded-for')
     const ip = forwarded
       ? forwarded.split(',')[0].trim()
@@ -47,7 +46,7 @@ export async function POST(request) {
       )
     }
 
-    // Step 3 — check duplicate IP (skips shared college WiFi)
+    // Step 3 — check duplicate IP
     const isSharedNetwork =
       ip === 'unknown' ||
       ip.startsWith('10.') ||
@@ -69,41 +68,37 @@ export async function POST(request) {
       }
     }
 
-    // Step 4 — geofencing check
-    const geofencingEnabled = process.env.NEXT_PUBLIC_GEOFENCING_ENABLED === 'true'
+    // Step 4 — geofencing check (reads from session, not env)
+    const { data: sessionData } = await supabase
+      .from('sessions')
+      .select('host_lat, host_lng, geo_radius, geo_enabled')
+      .eq('id', sessionId)
+      .single()
 
-    if (geofencingEnabled) {
-      const { data: sessionData } = await supabase
-        .from('sessions')
-        .select('host_lat, host_lng, geo_radius')
-        .eq('id', sessionId)
-        .single()
-
-      if (sessionData?.host_lat && sessionData?.host_lng) {
-        if (!studentLat || !studentLng) {
-          return NextResponse.json(
-            { error: 'Location is required to mark attendance. Please allow location access and try again.' },
-            { status: 400 }
-          )
-        }
-
-        const distance = getDistanceMeters(
-          studentLat,
-          studentLng,
-          sessionData.host_lat,
-          sessionData.host_lng
+    if (sessionData?.geo_enabled && sessionData?.host_lat && sessionData?.host_lng) {
+      if (!studentLat || !studentLng) {
+        return NextResponse.json(
+          { error: 'Location is required. Please allow location access and try again.' },
+          { status: 400 }
         )
+      }
 
-        if (distance > (sessionData.geo_radius || 100)) {
-          return NextResponse.json(
-            { error: `You are ${Math.round(distance)}m away from the classroom. You must be within ${sessionData.geo_radius || 100}m.` },
-            { status: 400 }
-          )
-        }
+      const distance = getDistanceMeters(
+        studentLat,
+        studentLng,
+        sessionData.host_lat,
+        sessionData.host_lng
+      )
+
+      if (distance > (sessionData.geo_radius || 100)) {
+        return NextResponse.json(
+          { error: `You are ${Math.round(distance)}m away. Must be within ${sessionData.geo_radius || 100}m.` },
+          { status: 400 }
+        )
       }
     }
 
-    // Step 5 — insert with IP
+    // Step 5 — insert
     const { error: insertError } = await supabase
       .from('attendance')
       .insert({
