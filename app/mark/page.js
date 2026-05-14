@@ -453,7 +453,7 @@ export default function MarkAttendance() {
                 <input
                   type="text"
                   inputMode="numeric"
-                  placeholder="Enter your roll number"
+                  placeholder="Enter your 2 Digit roll number"
                   value={roll}
                   onChange={(e) => setRoll(e.target.value)}
                   disabled={!isOpen || loading}
