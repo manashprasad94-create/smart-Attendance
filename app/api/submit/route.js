@@ -9,7 +9,8 @@ const supabase = createClient(
 
 export async function POST(request) {
   try {
-    const { name, roll, sessionId, studentLat, studentLng } = await request.json()
+    const { name, roll, sessionId, studentLat, studentLng, deviceId } = await request.json()
+    console.log('Received deviceId:', deviceId)
 
     const forwarded = request.headers.get('x-forwarded-for')
     const ip = forwarded
@@ -32,19 +33,22 @@ export async function POST(request) {
     }
 
     // Step 2 — check duplicate student
-    const { data: existingStudent } = await supabase
-      .from('attendance')
-      .select('*')
-      .eq('session_id', sessionId)
-      .eq('student_id', student.id)
-      .single()
+const { data: existingDevice } = await supabase
+  .from('attendance')
+  .select('id')
+  .eq('session_id', sessionId)
+  .eq('device_id', deviceId)
+  .limit(1)
 
-    if (existingStudent) {
-      return NextResponse.json(
-        { error: 'You have already marked your attendance for this session.' },
-        { status: 400 }
-      )
-    }
+if (existingDevice && existingDevice.length > 0) {
+  return NextResponse.json(
+    {
+      error:
+        'Attendance has already been submitted from this device for this session.'
+    },
+    { status: 400 }
+  )
+}
 
 
 
@@ -84,7 +88,8 @@ export async function POST(request) {
       .insert({
         session_id: sessionId,
         student_id: student.id,
-        ip_address: ip
+        ip_address: ip,
+        device_id: deviceId
       })
 
     if (insertError) {

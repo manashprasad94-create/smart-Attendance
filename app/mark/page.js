@@ -145,6 +145,7 @@ export default function MarkAttendance() {
       const result = await fp.get()
 
       const deviceId = result.visitorId
+      console.log('DEVICE ID:', deviceId)
 
       const res = await fetch('/api/submit', {
         method: 'POST',
