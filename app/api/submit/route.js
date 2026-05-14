@@ -11,6 +11,7 @@ export async function POST(request) {
   try {
     const { name, roll, sessionId, studentLat, studentLng } = await request.json()
 
+    // Get IP
     const forwarded = request.headers.get('x-forwarded-for')
     const ip = forwarded
       ? forwarded.split(',')[0].trim()
@@ -46,7 +47,7 @@ export async function POST(request) {
       )
     }
 
-    // Step 3 — check duplicate IP
+    // Step 3 — check duplicate IP (skips shared college WiFi)
     const isSharedNetwork =
       ip === 'unknown' ||
       ip.startsWith('10.') ||
@@ -95,14 +96,14 @@ export async function POST(request) {
 
         if (distance > (sessionData.geo_radius || 100)) {
           return NextResponse.json(
-            { error: `You are ${Math.round(distance)}m away from the classroom. You must be within ${sessionData.geo_radius || 100}m to mark attendance.` },
+            { error: `You are ${Math.round(distance)}m away from the classroom. You must be within ${sessionData.geo_radius || 100}m.` },
             { status: 400 }
           )
         }
       }
     }
 
-    // Step 5 — insert
+    // Step 5 — insert with IP
     const { error: insertError } = await supabase
       .from('attendance')
       .insert({
