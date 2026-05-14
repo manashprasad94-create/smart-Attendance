@@ -342,6 +342,19 @@ async function startSession() {
         >
           ← Back
         </button>
+        <button
+  onClick={() => router.push('/admin/history')}
+  style={{
+    background: '#fff', border: '0.5px solid #D3D1C7',
+    borderRadius: 20, padding: '8px 18px',
+    fontSize: 13, fontWeight: 500, color: '#5F5E5A',
+    cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
+    minHeight: 44,
+    WebkitTapHighlightColor: 'transparent'
+  }}
+>
+  History
+</button>
 
         <span style={{
           fontSize: 12, fontWeight: 500,

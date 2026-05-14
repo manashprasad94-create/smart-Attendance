@@ -18,11 +18,11 @@ export async function POST(request) {
 
     // Step 1 — validate student
     const { data: student, error: studentError } = await supabase
-      .from('students')
-      .select('*')
-      .ilike('name', name.trim())
-      .eq('roll_number', roll.trim())
-      .single()
+        .from('students')
+        .select('*')
+        .ilike('name', name.trim().replace(/\s+/g, ' '))
+        .ilike('roll_number', roll.trim())
+        .single()
 
     if (studentError || !student) {
       return NextResponse.json(
@@ -46,27 +46,7 @@ export async function POST(request) {
       )
     }
 
-    // Step 3 — check duplicate IP
-    const isSharedNetwork =
-      ip === 'unknown' ||
-      ip.startsWith('10.') ||
-      ip.startsWith('192.168.')
 
-    if (!isSharedNetwork) {
-      const { data: existingIP } = await supabase
-        .from('attendance')
-        .select('*')
-        .eq('session_id', sessionId)
-        .eq('ip_address', ip)
-        .single()
-
-      if (existingIP) {
-        return NextResponse.json(
-          { error: 'Attendance has already been submitted from your device.' },
-          { status: 400 }
-        )
-      }
-    }
 
     // Step 4 — geofencing check (reads from session, not env)
     const { data: sessionData } = await supabase
