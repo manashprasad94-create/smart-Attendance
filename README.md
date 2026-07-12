@@ -141,14 +141,8 @@ lib/
 
 ---
 
-## Notes / Limitations
 
-- Admin auth is a simple shared-password check (via `ADMIN_PASSWORD`), not per-user accounts — fine for a single class/CR, not intended for multi-tenant use.
-- Geofencing relies on browser geolocation accuracy, which can vary indoors.
-- Device fingerprinting reduces proxy attendance but isn't foolproof against a determined user with multiple devices/browsers.
 
 ---
-
-## Author
 
 Made by **Manash** for IT1, 2024–2028.
