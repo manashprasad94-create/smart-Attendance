@@ -2,7 +2,7 @@
 
 A lightweight, session-based attendance app for classrooms. The host (teacher/CR) opens a time-boxed session from an admin panel, students mark themselves present from their phones, and attendance is validated server-side using name/roll matching, device fingerprinting, and optional GPS geofencing — all without needing student accounts or a native app.
 
-**Live demo:** _add your deployed URL here_
+**Live demo:** [https://smart-attendance-chi-three.vercel.app/]
 
 ---
 
