@@ -447,13 +447,13 @@ export default function MarkAttendance() {
                     letterSpacing: '0.07em'
                   }}
                 >
-                  Roll Number
+                  Roll Number [University]
                 </label>
 
                 <input
                   type="text"
                   inputMode="numeric"
-                  placeholder="Enter your 2 Digit roll number"
+                  placeholder="Enter your 2 Digit Roll Number"
                   value={roll}
                   onChange={(e) => setRoll(e.target.value)}
                   disabled={!isOpen || loading}
