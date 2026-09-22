@@ -141,7 +141,7 @@ export default function MarkAttendance() {
 
     try {
       // Generate device fingerprint
-      const fp = await FingerprintJS.load()
+      const fp = await FingerprintJS.load({ monitoring: false })
       const result = await fp.get()
 
       const deviceId = result.visitorId
