@@ -35,7 +35,7 @@ The application enables educators and administrators to open time-boxed attendan
 Traditional classroom attendance methods rely on verbal roll calls or circulating sign-in sheets. These approaches waste instructional time, produce paper waste, require manual transcription, and are susceptible to proxy marking ("buddy punching").
 
 ### How It Works
-1. **Session Initialization**: An instructor or class representative accesses the protected `/admin` panel using an administrator password. The host selects a session duration (3, 5, 10, or 15 minutes), optionally enables GPS geofencing with a radius (50m, 100m, 200m, or 500m), and starts the session. The host's browser geolocation coordinates are captured as the geofence center point.
+1. **Session Initialization**: An instructor or class representative accesses the protected `/admin` panel using an administrator password. The host selects a session duration (3, 5, 10, or 15 minutes), optionally enables GPS geofencing with a radius (20m, 100m, 200m, or 500m), and starts the session. The host's browser geolocation coordinates are captured as the geofence center point.
 2. **Student Access**: Students navigate to the home page (`/`) on their mobile device or laptop. The portal displays a real-time countdown timer reflecting the active session. When active, students proceed to `/mark`.
 3. **Identity & Device Verification**: Students provide their registered full name and university roll number. In the background, FingerprintJS generates a hardware/browser visitor fingerprint, and the HTML5 Geolocation API retrieves student coordinates if geofencing is enabled.
 4. **Server-Side Validation**: The attendance submission is sent to `/api/submit`, where the server executes four validation checks:
@@ -54,7 +54,7 @@ Traditional classroom attendance methods rely on verbal roll calls or circulatin
 - **Zero-Registration Student Flow**: Students enter their name and roll number without creating credentials or installing native applications.
 - **Hardware/Browser Fingerprinting**: Integrates `@fingerprintjs/fingerprintjs` to generate unique visitor identifiers, preventing a single device from submitting attendance for multiple students during the same session.
 - **Server-Side Geofencing**: Optional geographic validation calculating distance with the Haversine formula. Distance verification is performed on the server rather than trusting client calculations.
-- **Configurable Geofence Radius**: Selectable proximity radii of 50m, 100m, 200m, or 500m around the host location.
+- **Configurable Geofence Radius**: Selectable proximity radii of 20m, 100m, 200m, or 500m around the host location.
 - **Real-Time Host Dashboard**: Automatic live polling every 4 seconds displaying total present, attendance percentage, and roll-sorted attendees.
 - **Single-Click Plaintext Export**: Generates pre-formatted plaintext reports with subject name, date, attendance summary, and roll numbers for messaging platforms.
 - **Session History Management**: Review recent sessions, inspect historical attendance records, and delete outdated records.

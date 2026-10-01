@@ -538,7 +538,7 @@ async function startSession() {
                   Allowed Radius
                 </label>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8 }}>
-                  {[50, 100, 200, 500].map(r => (
+                  {[20, 100, 200, 500].map(r => (
                     <button
                       key={r}
                       onClick={() => setRadius(r)}
